@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type ReactNode, type Ref, type UIEvent, useEffect, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, Camera, Gift, MapPin, Phone, Volume2, VolumeX } from 'lucide-react';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
@@ -87,10 +87,10 @@ function BackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function SceneBackground() {
+function SceneBackground({ imgRef }: { imgRef?: Ref<HTMLDivElement> }) {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <div className="absolute inset-0" style={{ backgroundImage: `url(${invitationArt})`, backgroundPosition: 'center', backgroundSize: 'cover' }} />
+      <div ref={imgRef} className="absolute inset-0" style={{ backgroundImage: `url(${invitationArt})`, backgroundPosition: 'center', backgroundSize: 'cover', transform: 'scale(1.08)' }} />
       <div className="absolute inset-0" style={{ background: 'rgba(255,247,231,.68)' }} />
     </div>
   );
@@ -282,7 +282,7 @@ function ReceptionCard() {
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#f0dfbe', color: palette.maroon }}><MapPin size={16} /></span>
         <div>
-          <p className="text-[10px] uppercase tracking-[.17em]" style={{ color: '#a4856e' }}>Reception · Tue 1 Sep, 7:00 PM</p>
+          <p className="text-[10px] uppercase tracking-[.17em]" style={{ color: '#a4856e' }}>Find the reception</p>
           <p className="mt-1 text-[13px]" style={{ color: palette.maroon, fontFamily: 'var(--app-font-serif)' }}>K Convention, Sircilla</p>
         </div>
       </div>
@@ -319,9 +319,15 @@ function ContactCard() {
 
 function Invitation({ soundOn, toggleSound, goEnvelope }: { soundOn: boolean; toggleSound: () => void; goEnvelope: () => void }) {
   const [showCeremony, setShowCeremony] = useState(false);
+  const [showReception, setShowReception] = useState(false);
+  const bgRef = useRef<HTMLDivElement>(null);
+  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
+    if (bgRef.current) bgRef.current.style.transform = `translateY(${event.currentTarget.scrollTop * 0.08}px) scale(1.08)`;
+  };
   return (
-    <section className="wedding-screen-in wedding-noise relative flex h-full flex-col overflow-y-auto">
-      <SceneBackground />
+    <section className="wedding-screen-in wedding-noise relative flex h-full flex-col overflow-hidden">
+      <SceneBackground imgRef={bgRef} />
+      <div className="relative flex h-full flex-col overflow-y-auto" onScroll={handleScroll}>
       <header className="relative shrink-0 px-7 pb-6 pt-7" style={{ color: palette.maroon }}><div className="flex items-center justify-between"><div className="flex items-center gap-3"><BackButton onClick={goEnvelope} /><BrassDeepam compact /><div><p className="text-xs" style={{ fontFamily: 'var(--app-font-serif)' }}>మంగళ పరిణయం</p></div></div><SoundButton soundOn={soundOn} onToggle={toggleSound} dark /></div><div className="mt-7 text-center"><p className="text-[11px] uppercase tracking-[.26em]">With the blessings of our families</p><h2 data-testid="text-couple-names" className="mt-3 text-[50px] leading-[.9] tracking-[-.04em]" style={{ fontFamily: 'var(--app-font-serif)' }}>Prathyusha<br /><span className="text-[28px] italic" style={{ color: palette.goldLight }}>&amp;</span> Saikumar</h2><p className="mt-4 text-[12px] leading-5" style={{ color: palette.ink }}>invite you to witness their sacred union</p></div><div className="mt-6"><BorderMotif muted /></div></header>
       <div className="relative flex-1 px-7 pb-8 pt-7"><div className="pointer-events-none absolute right-2 top-0 opacity-55" style={{ color: palette.vermilion }}><svg width="88" height="120" viewBox="0 0 88 120" fill="none"><path d="M7 118C10 91 26 79 45 77C67 74 73 57 72 35M44 77C42 56 53 42 67 39M24 91C18 75 19 61 31 52" stroke="currentColor" strokeWidth="1.2" /><circle cx="72" cy="31" r="3" fill="currentColor" /><circle cx="31" cy="49" r="3" fill="currentColor" /></svg></div>
         <Reveal><div className="text-center"><p className="text-[11px] uppercase tracking-[.22em]" style={{ color: palette.vermilion }}>A Telugu wedding celebration</p><h3 className="mt-2 text-[25px] leading-tight" style={{ color: palette.maroon, fontFamily: 'var(--app-font-serif)' }}>Two hearts, one auspicious beginning</h3><p className="mx-auto mt-3 max-w-[290px] text-[13px] leading-6" style={{ color: '#765d54' }}>Join us as we begin our journey together, surrounded by the people who make life beautiful.</p></div></Reveal>
@@ -331,10 +337,13 @@ function Invitation({ soundOn, toggleSound, goEnvelope }: { soundOn: boolean; to
         {showCeremony && <div data-testid="panel-ceremony-details" className="wedding-fade-in mt-4 rounded-2xl border p-4" style={{ borderColor: 'rgba(191,149,80,.38)', background: '#f7ead1' }}><div className="flex items-start gap-3"><span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[.08em]" style={{ color: palette.vermilion }}>Now</span><div><p className="text-[10px] uppercase tracking-[.17em]" style={{ color: palette.vermilion }}>Auspicious moments</p><p className="mt-1 text-[13px] leading-5" style={{ color: palette.ink }}>Muhurtham at 11:05 AM · Utharabhadra Nakshatram, Thula Lagnam · Lunch to follow</p><p className="mt-2 text-[12px] leading-5" style={{ color: '#8a6c60' }}>Laxmi Narasimha Convention, Warangal Road, Algunoor, Karimnagar</p></div></div></div>}
         <Reveal delay={0} className="mt-6"><Countdown /></Reveal>
         <Reveal delay={80} className="mt-4"><DirectionsCard /></Reveal>
-        <Reveal delay={90} className="mt-3"><ReceptionCard /></Reveal>
+        <Reveal delay={90}><button type="button" data-testid="button-toggle-reception" aria-expanded={showReception} onClick={() => setShowReception((current) => !current)} className="mt-3 flex w-full items-center justify-between rounded-2xl px-5 py-4 text-left transition-transform duration-300 active:scale-[.985]" style={{ background: palette.maroon, color: palette.ivory }}><span><span className="block text-[10px] uppercase tracking-[.18em]" style={{ color: palette.goldLight }}>One more celebration</span><span className="mt-1 block text-[17px]" style={{ fontFamily: 'var(--app-font-serif)' }}>View the reception details</span></span><span className="flex h-9 w-9 items-center justify-center rounded-full" style={{ background: 'rgba(223,193,126,.16)', color: palette.goldLight }}><ArrowRight size={16} /></span></button></Reveal>
+        {showReception && <div data-testid="panel-reception-details" className="wedding-fade-in mt-4 rounded-2xl border p-4" style={{ borderColor: 'rgba(191,149,80,.38)', background: '#f7ead1' }}><div className="flex items-start gap-3"><span className="mt-0.5 text-[10px] font-semibold uppercase tracking-[.08em]" style={{ color: palette.vermilion }}>Sep 1</span><div><p className="text-[10px] uppercase tracking-[.17em]" style={{ color: palette.vermilion }}>Reception</p><p className="mt-1 text-[13px] leading-5" style={{ color: palette.ink }}>Tuesday, 1 September 2026 · 7:00 PM</p><p className="mt-2 text-[12px] leading-5" style={{ color: '#8a6c60' }}>K Convention, Sircilla Bypass Road, Sircilla</p></div></div></div>}
+        <Reveal delay={100} className="mt-3"><ReceptionCard /></Reveal>
         <Reveal className="mt-10"><FamilyBlessings /></Reveal>
         <Reveal delay={100} className="mt-8"><ContactCard /></Reveal>
         <Reveal delay={80}><div className="mt-8 text-center text-[10px] uppercase tracking-[.2em]" style={{ color: '#a4856e' }}>Made with blessings</div></Reveal>
+      </div>
       </div>
     </section>
   );
