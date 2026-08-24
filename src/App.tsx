@@ -152,7 +152,13 @@ function Envelope({ soundOn, toggleSound, openInvitation, opened }: { soundOn: b
         </div>
         <p className="mt-9 text-center text-[11px] uppercase tracking-[.2em]" style={{ color: '#9f826f' }}>Your presence is our blessing</p>
       </div>
-      <div className="px-7 pb-8"><p className="text-center text-[10px] uppercase tracking-[.22em]" style={{ color: palette.maroon }}>Touch anywhere to continue</p></div>
+      <div className="relative px-7 pb-8">
+        <button type="button" data-testid="button-open-invitation" onClick={openInvitation} className="flex h-[52px] w-full items-center justify-center gap-2 rounded-full transition-transform duration-300 active:scale-[.97]" style={{ background: palette.goldLight, color: palette.darkMaroon, boxShadow: '0 10px 25px rgba(25,9,12,.2)' }}>
+          <span className="text-[12px] font-semibold uppercase tracking-[.2em]">Tap to open</span>
+          <ArrowRight size={16} />
+        </button>
+        <p className="mt-4 text-center text-[10px] uppercase tracking-[.22em]" style={{ color: palette.maroon }}>Touch anywhere to continue</p>
+      </div>
     </section>
   );
 }
